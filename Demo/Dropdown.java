@@ -170,10 +170,9 @@ public class Dropdown {
     public void TC_06_VueJs() {
         driver.get("https://mikerodham.github.io/vue-dropdowns/");
 
-         //loi
+        
         selectTheItemInCustomDropdown("//li[@class='dropdown-toggle']","//ul[@class='dropdown-menu']//a","\n" +"Second Option");
         sleepInSecond(2);
-//        String getName = driver.findElement(By.xpath("//li[@class='dropdown-toggle']")).getText().trim();
         Assert.assertEquals(driver.findElement(By.xpath("//li[@class='dropdown-toggle']")).getText().trim(),"Second Option");
     }
 
@@ -181,10 +180,9 @@ public class Dropdown {
     public void TC_07_Angular() {
         driver.get("https://ej2.syncfusion.com/angular/demos/?_ga=2.262049992.437420821.1575083417-524628264.1575083417#/material/drop-down-list/data-binding");
 
-            //loi
+        
         selectTheItemInCustomDropdown("//ejs-dropdownlist[@id='games']//span[contains(@class,'e-search-icon')]","//ul[@id='games_options']//li","\n" + "Basketball");
         sleepInSecond(3);
-        System.out.println(getHiddenText("select[id='games_hidden']>option"));
         Assert.assertEquals(getHiddenText("select[id='games_hidden']>option"),"Basketball");
 
     }
