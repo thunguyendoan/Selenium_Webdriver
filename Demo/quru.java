@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-public class quru {
+public class Topic_07 {
     WebDriver driver;
     String loginPageURL, getUserID, getPasswordID, getCustomerID;
 
@@ -79,6 +79,7 @@ public class quru {
 
     //Input data in Edit Customer
     String update = "434 Nguyen tri phuong\nQuan 10\nHo Chi Minh";
+    String update1 = update.replace("\n", " ");
     String city1 = "Ho Chi Minh";
     String state1 = "Quan 10";
     String pin1 = "567891";
@@ -200,35 +201,38 @@ public class quru {
 
 
         // Update Edit Customer
+        driver.findElement(addressTextbox).clear();
         driver.findElement(addressTextbox).sendKeys(update);
+        driver.findElement(cityTextbox).clear();
         driver.findElement(cityTextbox).sendKeys(city1);
+        driver.findElement(stateTextbox).clear();
         driver.findElement(stateTextbox).sendKeys(state1);
+        driver.findElement(pinTextbox).clear();
         driver.findElement(pinTextbox).sendKeys(pin1);
+        driver.findElement(phoneTextbox).clear();
         driver.findElement(phoneTextbox).sendKeys(phone1);
+        driver.findElement(emailTextbox).clear();
         driver.findElement(emailTextbox).sendKeys(email1);
-
-        // Get Update Customer
-        String getUpdateAddress = driver.findElement(addressTextbox).getText();
-        String getUpdateCity = driver.findElement(cityTextbox).getText();
-        String getUpdateState = driver.findElement(stateTextbox).getText();
-        String getUpdatePin = driver.findElement(pinTextbox).getText();
-        String getUpdatePhone = driver.findElement(phoneTextbox).getText();
-        String getUpdateEmail = driver.findElement(emailTextbox).getText();
-
 
         clickToElement(btnSubmit1);
 
-        Thread.sleep(4000);
+
+        // Get Update Customer
+        String getUpdateAddress = driver.findElement(locatorAddress).getText();
+        String getUpdateCity = driver.findElement(locatorCity).getText();
+        String getUpdateState = driver.findElement(locatorState).getText();
+        String getUpdatePin = driver.findElement(locatorPin).getText();
+        String getUpdatePhone = driver.findElement(locatorPhone).getText();
+        String getUpdateEmail = driver.findElement(locatorEmail).getText();
+
 
         // Verify Update Edit Customer
-        Assert.assertEquals(getUpdateAddress,update);
+        Assert.assertEquals(getUpdateAddress,update1);
         Assert.assertEquals(getUpdateCity,city1);
         Assert.assertEquals(getUpdateState,state1);
         Assert.assertEquals(getUpdatePin,pin1);
         Assert.assertEquals(getUpdatePhone,phone1);
         Assert.assertEquals(getUpdateEmail,email1);
-
-
 
     }
 
