@@ -1,8 +1,12 @@
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -15,36 +19,42 @@ import java.util.concurrent.TimeUnit;
 public class Dropdown {
     WebDriver driver;
     Select select;
+    WebDriverWait explicitWait;
+    JavascriptExecutor jsExecutor;
 
     @BeforeClass
     public void beforeClass() {
 
         driver = new ChromeDriver();
+
+        explicitWait = new WebDriverWait(driver, 30);
+        jsExecutor = (JavascriptExecutor) driver;
+
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
         driver.manage().window().maximize();
 
     }
 
-   @Test
-   public void TC_01_Handle_Dropdown_List() {
-       driver.get("https://www.rode.com/wheretobuy");
+    @Test
+    public void TC_01_Handle_Dropdown_List() {
+        driver.get("https://www.rode.com/wheretobuy");
 
-       // Verify Country is not Muilt-drop
-       select = new Select(driver.findElement(By.xpath("//select[@id=\"where_country\"]")));
-       Assert.assertFalse(select.isMultiple());
+        // Verify Country is not Muilt-drop
+        select = new Select(driver.findElement(By.xpath("//select[@id=\"where_country\"]")));
+        Assert.assertFalse(select.isMultiple());
 
-       //Choose value
-       select.selectByVisibleText("Vietnam");
+        //Choose value
+        select.selectByVisibleText("Vietnam");
 
-       // Verify choose success
-       Assert.assertEquals(select.getFirstSelectedOption().getText(),"Vietnam");
+        // Verify choose success
+        Assert.assertEquals(select.getFirstSelectedOption().getText(),"Vietnam");
 
-       driver.findElement(By.xpath("//input[@value=\"Search\"]")).click();
+        driver.findElement(By.xpath("//input[@value=\"Search\"]")).click();
 
-       String getResultDistance = driver.findElement(By.xpath("//div[@class=\"result_count\"]/span")).getText();
-       Assert.assertEquals(getResultDistance,"29");
+        String getResultDistance = driver.findElement(By.xpath("//div[@class=\"result_count\"]/span")).getText();
+        Assert.assertEquals(getResultDistance,"29");
 
-   }
+    }
 
     @Test
     public void TC_02_Register() {
@@ -135,7 +145,90 @@ public class Dropdown {
         Assert.assertEquals(getEmail,email);
         Assert.assertEquals(getCompany,company);
 
+    }
 
+    @Test
+    public void TC_04_JQuery() {
+        driver.get("https://jqueryui.com/resources/demos/selectmenu/default.html");
+
+        selectTheItemInCustomDropdown("//span[@id='number-button']","//ul[@id='number-menu']//div","19");
+        sleepInSecond(3);
+        Assert.assertTrue(driver.findElement(By.xpath("//span[@id='number-button']/span[text()='19']")).isDisplayed());
+    }
+
+    @Test
+    public void TC_05_ReachJs() {
+        driver.get("https://react.semantic-ui.com/maximize/dropdown-example-selection/");
+
+        selectTheItemInCustomDropdown("//div[@id='root']","//div[@id='root']//div[@class='item']","Stevie Feliciano");
+        sleepInSecond(3);
+        String getName = driver.findElement(By.xpath("//div[@id='root']//div[@class='divider text']")).getText();
+        Assert.assertEquals(getName,"Stevie Feliciano");
+    }
+
+    @Test
+    public void TC_06_VueJs() {
+        driver.get("https://mikerodham.github.io/vue-dropdowns/");
+
+        
+        selectTheItemInCustomDropdown("//li[@class='dropdown-toggle']","//ul[@class='dropdown-menu']//a","\n" +"Second Option");
+        sleepInSecond(2);
+        Assert.assertEquals(driver.findElement(By.xpath("//li[@class='dropdown-toggle']")).getText().trim(),"Second Option");
+    }
+
+    @Test
+    public void TC_07_Angular() {
+        driver.get("https://ej2.syncfusion.com/angular/demos/?_ga=2.262049992.437420821.1575083417-524628264.1575083417#/material/drop-down-list/data-binding");
+
+        
+        selectTheItemInCustomDropdown("//ejs-dropdownlist[@id='games']//span[contains(@class,'e-search-icon')]","//ul[@id='games_options']//li","\n" + "Basketball");
+        sleepInSecond(3);
+        Assert.assertEquals(getHiddenText("select[id='games_hidden']>option"),"Basketball");
+
+    }
+
+
+    public void selectTheItemInCustomDropdown(String parentXpath, String childXpath, String expectedItem) {
+        //1 - Click vào thẻ (cha) để nó xổ ra tất cả các item
+        driver.findElement(By.xpath(parentXpath)).click();
+        sleepInSecond(1);
+
+        //2- chờ cac item load ra het
+        explicitWait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(childXpath)));
+
+        //3-lay tat cả cac item dua vào List Element
+        List<WebElement> childItems = driver.findElements(By.xpath(childXpath));
+
+        //4- Duyet qua cai List này từng Item
+        for (WebElement actualItem : childItems) {
+
+            //5-Mỗi lần duyệt kiểm tra cái item text của nó có bằng vs Item mình cần chọn
+            if(actualItem.getText().trim().equals(expectedItem)) {
+
+                //6- tìm thấy Item cần Click thì scroll xuống Item đó(nằm bên dưới)
+                jsExecutor.executeScript("arguments[0].scrollIntoView(true)",actualItem);
+                sleepInSecond(2);
+
+                //7-Click vào Item
+                actualItem.click();
+
+                //8-thoát khỏi vòng lặp
+                break;
+            }
+        }
+    }
+
+    //
+    public String getHiddenText(String cssLocator) {
+        return (String) jsExecutor.executeScript("return document.querySelector(\"" +cssLocator + "\").textContent");
+    }
+
+    public void sleepInSecond(long second) {
+        try {
+            Thread.sleep(second * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public int getRandomNum() {
