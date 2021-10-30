@@ -22,6 +22,12 @@ public class Dropdown {
     WebDriverWait explicitWait;
     JavascriptExecutor jsExecutor;
 
+    String expectedText = "";
+    String[] months = {"January", "March", "June"};
+    String[] newMonths = {"January", "March", "June", "October", "December"};
+    String[] eightMonths = {"January", "March", "June", "October", "December", "April", "May", "July"};
+    String[] allMonths = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+
     @BeforeClass
     public void beforeClass() {
 
@@ -35,7 +41,7 @@ public class Dropdown {
 
     }
 
-    @Test
+
     public void TC_01_Handle_Dropdown_List() {
         driver.get("https://www.rode.com/wheretobuy");
 
@@ -56,7 +62,7 @@ public class Dropdown {
 
     }
 
-    @Test
+
     public void TC_02_Register() {
         driver.get("https://demo.nopcommerce.com");
 
@@ -147,7 +153,7 @@ public class Dropdown {
 
     }
 
-    @Test
+
     public void TC_04_JQuery() {
         driver.get("https://jqueryui.com/resources/demos/selectmenu/default.html");
 
@@ -156,7 +162,7 @@ public class Dropdown {
         Assert.assertTrue(driver.findElement(By.xpath("//span[@id='number-button']/span[text()='19']")).isDisplayed());
     }
 
-    @Test
+
     public void TC_05_ReachJs() {
         driver.get("https://react.semantic-ui.com/maximize/dropdown-example-selection/");
 
@@ -166,31 +172,177 @@ public class Dropdown {
         Assert.assertEquals(getName,"Stevie Feliciano");
     }
 
-    @Test
+
     public void TC_06_VueJs() {
         driver.get("https://mikerodham.github.io/vue-dropdowns/");
 
-        
+         //loi
         selectTheItemInCustomDropdown("//li[@class='dropdown-toggle']","//ul[@class='dropdown-menu']//a","\n" +"Second Option");
         sleepInSecond(2);
-        Assert.assertEquals(driver.findElement(By.xpath("//li[@class='dropdown-toggle']")).getText().trim(),"Second Option");
+        Assert.assertEquals(driver.findElement(By.xpath("//li[@class='dropdown-toggle']")).getText(),"Second Option");
     }
 
-    @Test
+
     public void TC_07_Angular() {
         driver.get("https://ej2.syncfusion.com/angular/demos/?_ga=2.262049992.437420821.1575083417-524628264.1575083417#/material/drop-down-list/data-binding");
 
-        
+            //loi
         selectTheItemInCustomDropdown("//ejs-dropdownlist[@id='games']//span[contains(@class,'e-search-icon')]","//ul[@id='games_options']//li","\n" + "Basketball");
         sleepInSecond(3);
+        System.out.println(getHiddenText("select[id='games_hidden']>option"));
         Assert.assertEquals(getHiddenText("select[id='games_hidden']>option"),"Basketball");
 
     }
 
 
+    public void TC_08_EditDropdwon() {
+        driver.get("http://indrimuska.github.io/jquery-editable-select/");
+
+        selectTheItemInEditDropdown("//div[@id='default-place']/input","//div[@id='default-place']//li","Audi");
+        sleepInSecond(3);
+        Assert.assertEquals(getHiddenText("div[id='default-place'] li[class='es-visible']"), "Audi");
+    }
+
+    @Test
+    public void TC_09_Multiple_Select() {
+        driver.get("https://multiple-select.wenzhixin.net.cn/templates/template.html?v=189&url=basic.html");
+
+        selectMultiItemInDropdown("(//button[@class='ms-choice'])[1]", "(//div[@class='ms-drop bottom'])[1]//span",months);
+        sleepInSecond(2);
+        Assert.assertTrue(areItemSelected(months));
+
+        driver.navigate().refresh();
+
+        selectMultiItemInDropdown("(//button[@class='ms-choice'])[1]", "(//div[@class='ms-drop bottom'])[1]//span",newMonths);
+        sleepInSecond(2);
+        Assert.assertTrue(areItemSelected(newMonths));
+
+        driver.navigate().refresh();
+
+        selectMultiItemInDropdown("(//button[@class='ms-choice'])[1]", "(//div[@class='ms-drop bottom'])[1]//span",eightMonths);
+        sleepInSecond(2);
+        Assert.assertTrue(areItemSelected(eightMonths));
+
+        driver.navigate().refresh();
+
+        selectMultiItemInDropdown("(//button[@class='ms-choice'])[1]", "(//div[@class='ms-drop bottom'])[1]//span",allMonths);
+        sleepInSecond(2);
+        Assert.assertTrue(allItemSelected(allMonths));
+
+    }
+
+    public void selectMultiItemInDropdown(String parentXpath, String allItemXpath, String[] expectedValueItem) {
+        // 1: Click vao dropdown xo ra het cac gia tri
+        driver.findElement(By.xpath(parentXpath)).click();
+
+        // 2: Cho cho tat ca cac gia tri trong dropdown load thanh cong
+        explicitWait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(allItemXpath)));
+
+        List<WebElement> allItems = driver.findElements(By.xpath(allItemXpath));
+
+
+        //4- Duyet qua cai List này từng Item
+        for (WebElement childElement : allItems) {
+
+            // "Janary", "April", "July"
+            for(String item : expectedValueItem) {
+
+                if(childElement.getText().equals(item)) {
+                    // 3: scroll den item can chon (neu nhu item can con co the nhin thay thi khong can scroll)
+                    jsExecutor.executeScript("arguments[0].scrollIntoView(true);", childElement);
+                    sleepInSecond(1);
+
+                    // 4: Click vao item can chon
+                    childElement.click();
+                    sleepInSecond(1);
+
+                    List<WebElement> itemSelected = driver.findElements(By.xpath("//li[@class='selected']//input"));
+                    System.out.println("Item selected = " + itemSelected.size());
+                    if(expectedValueItem.length == itemSelected.size()) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean areItemSelected(String[] itemSelectedText) {
+        List<WebElement> itemSelected = driver.findElements(By.xpath("//li[@class='selected']//input"));
+        int numberItemSelected = itemSelected.size();
+
+        String allItemSelectedText = driver.findElement(By.xpath("(//button[@class='ms-choice']/span)[1]")).getText();
+        System.out.println("Text da chon = " + allItemSelectedText);
+
+        // January, March, June
+
+        if(numberItemSelected <= 3 && numberItemSelected > 0) {
+            for (String item : itemSelectedText) {
+                if(allItemSelectedText.contains(item)) {
+                    break;
+                }
+            }
+            return true;
+        } else {
+            return driver.findElement(By.xpath("//button[@class='ms-choice']/span[text()='" + numberItemSelected + " of 12 selected']")).isDisplayed();
+        }
+    }
+
+    public boolean allItemSelected(String[] itemSelectedText) {
+        List<WebElement> itemSelected = driver.findElements(By.xpath("//li[@class='selected']//input"));
+        int numberItemSelected = itemSelected.size();
+
+        String allItemSelectedText = driver.findElement(By.xpath("(//button[@class='ms-choice']/span)[1]")).getText();
+        System.out.println("Text da chon = " + allItemSelectedText);
+
+        // January, March, June
+
+        if(numberItemSelected <= 3 && numberItemSelected > 0) {
+            for (String item : itemSelectedText) {
+                if(allItemSelectedText.contains(item)) {
+                    break;
+                }
+            }
+            return true;
+        } else {
+            return driver.findElement(By.xpath("//button[@class='ms-choice']/span")).isDisplayed();
+        }
+    }
+
     public void selectTheItemInCustomDropdown(String parentXpath, String childXpath, String expectedItem) {
         //1 - Click vào thẻ (cha) để nó xổ ra tất cả các item
         driver.findElement(By.xpath(parentXpath)).click();
+        sleepInSecond(1);
+
+        //2- chờ cac item load ra het
+        explicitWait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(childXpath)));
+
+        //3-lay tat cả cac item dua vào List Element
+        List<WebElement> childItems = driver.findElements(By.xpath(childXpath));
+
+        //4- Duyet qua cai List này từng Item
+        for (WebElement actualItem : childItems) {
+
+            //5-Mỗi lần duyệt kiểm tra cái item text của nó có bằng vs Item mình cần chọn
+            if(actualItem.getText().trim().equals(expectedItem)) {
+
+                //6- tìm thấy Item cần Click thì scroll xuống Item đó(nằm bên dưới)
+                jsExecutor.executeScript("arguments[0].scrollIntoView(true)",actualItem);
+                sleepInSecond(2);
+
+                //7-Click vào Item
+                actualItem.click();
+
+                //8-thoát khỏi vòng lặp
+                break;
+            }
+        }
+    }
+
+    public void selectTheItemInEditDropdown(String parentXpath, String childXpath, String expectedItem) {
+        driver.findElement(By.xpath(parentXpath)).clear();
+        sleepInSecond(1);
+
+        driver.findElement(By.xpath(parentXpath)).sendKeys(expectedItem);
         sleepInSecond(1);
 
         //2- chờ cac item load ra het
