@@ -183,6 +183,7 @@ public class Topic_07 {
         Assert.assertFalse(driver.findElement(nameTextbox).isEnabled());
         Assert.assertFalse(driver.findElement(DOBTextbox).isEnabled());
 
+
         // Get Output
         String getCustomer = driver.findElement(nameTextbox).getAttribute("value");
         String getDOB1 = driver.findElement(DOBTextbox).getAttribute("value");
